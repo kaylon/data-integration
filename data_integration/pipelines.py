@@ -15,8 +15,8 @@ class Node():
     cost: float = None
 
     def __init__(self, id: str, description: str, labels: {str: str} = None, continue_on_error=False) -> None:
-        if not re.match('^[a-z0-9_]+$', id):
-            raise ValueError(f'Invalid id "{id}". Should only contain lowercase letters, numbers and "-".')
+        if not re.match('^[a-z0-9_\-]+$', id):
+            raise ValueError(f'Invalid id "{id}". Should only contain lowercase letters, numbers and "_".')
         self.id = id
         self.description = description
         self.labels = labels or {}
