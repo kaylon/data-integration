@@ -6,7 +6,6 @@ import typing
 from data_integration import shell, config
 
 
-
 class Node():
     """Base class for pipeline elements"""
     parent: 'Pipeline' = None
@@ -14,14 +13,13 @@ class Node():
     downstreams: {'Node'} = None
     cost: float = None
 
-    def __init__(self, id: str, description: str, labels: {str: str} = None, continue_on_error=False) -> None:
+    def __init__(self, id: str, description: str, labels: {str: str} = None) -> None:
         if not re.match('^[a-z0-9_\-]+$', id):
             raise ValueError(f'Invalid id "{id}". Should only contain lowercase letters, numbers and "_".')
         self.id = id
         self.description = description
         self.labels = labels or {}
 
-        self.continue_on_error = continue_on_error
         self.upstreams = set()
         self.downstreams = set()
 
@@ -154,12 +152,19 @@ class Pipeline(Node):
     initial_node: Node = None
     final_node: Node = None
 
-    def __init__(self, id: str, description: str, max_number_of_parallel_tasks: int = None,
-                 base_path: pathlib.Path = None, labels: {str: str} = None) -> None:
+    def __init__(self, id: str,
+                 description: str,
+                 max_number_of_parallel_tasks: int = None,
+                 base_path: pathlib.Path = None,
+                 labels: {str: str} = None,
+                 ignore_errors_on_direct_children: bool = False,
+                 force_run_all_children: bool = False) -> None:
         super().__init__(id, description, labels)
         self.nodes = {}
         self._base_path = base_path
         self.max_number_of_parallel_tasks = max_number_of_parallel_tasks
+        self.force_run_all_children = force_run_all_children
+        self.ignore_errors_on_direct_children = ignore_errors_on_direct_children
 
     def add(self, node: Node, upstreams: [typing.Union[str, Node]] = None) -> 'Pipeline':
         if node.id in self.nodes:
